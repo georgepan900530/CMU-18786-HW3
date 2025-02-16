@@ -46,9 +46,9 @@ if __name__ == "__main__":
 
     cifar_transform_train = transforms.Compose(
         [
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(10),
-            transforms.RandomGrayscale(p=0.2),
+            # transforms.RandomHorizontalFlip(),
+            # transforms.RandomRotation(10),
+            # transforms.RandomGrayscale(p=0.2),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)

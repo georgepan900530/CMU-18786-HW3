@@ -57,6 +57,7 @@ def train_model_classification(
         "test_acc": [],
         "epochs": [i + 1 for i in range(num_epochs)],
     }
+    min_val_loss = float("inf")
     for epoch in tqdm(range(num_epochs)):
         train_loss_list = []
         train_acc_list = []
@@ -84,7 +85,6 @@ def train_model_classification(
         model.eval()
         val_loss_list = []
         val_acc_list = []
-        min_val_loss = float("inf")
         with torch.no_grad():
             for imgs, labels in val_loader:
                 imgs, labels = imgs.to(device), labels.to(device)
