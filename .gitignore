@@ -6,3 +6,4 @@ plots/
 *.docx
 .DS_Store
 test.py
+*.pth

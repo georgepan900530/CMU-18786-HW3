@@ -147,7 +147,7 @@ class MyResNet(nn.Module):
         self.layer3 = self.make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self.make_layer(block, 512, layers[3], stride=2)
         self.avg_pool = nn.AvgPool2d(8)
-        self.fc = nn.Linear(512, num_classes)
+        self.fc = nn.Linear(256, num_classes)
         self.dropout = nn.Dropout(p=0.5)
 
     def make_layer(self, block, out_channels, blocks, stride=1):

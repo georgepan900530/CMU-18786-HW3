@@ -130,7 +130,7 @@ if __name__ == "__main__":
     elif args.model_type == "EfficientNet":
         model = EfficientNet()
     elif args.model_type == "MyResNet":
-        model = MyResNet(Residual_Block, [3, 3, 3, 3])
+        model = MyResNet()
     else:
         raise ValueError(f"Invalid model type: {args.model_type}")
 
