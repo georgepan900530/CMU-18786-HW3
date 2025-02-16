@@ -57,7 +57,7 @@ def train_model_classification(
         "test_acc": [],
         "epochs": [i + 1 for i in range(num_epochs)],
     }
-    min_val_loss = float("inf")
+    min_test_loss = float("inf")
     for epoch in tqdm(range(num_epochs)):
         train_loss_list = []
         train_acc_list = []
@@ -100,13 +100,6 @@ def train_model_classification(
         logs["val_loss"].append(val_loss)
         logs["val_acc"].append(val_acc)
 
-        if val_loss < min_val_loss:
-            min_val_loss = val_loss
-            print(f"Saving model at epoch {epoch+1}")
-            torch.save(model.state_dict(), save_model_path)
-
-        scheduler.step(val_loss)
-
         # Testing
         model.eval()
         test_loss_list = []
@@ -125,6 +118,13 @@ def train_model_classification(
         logs["test_loss"].append(test_loss)
         logs["test_acc"].append(test_acc)
 
+        if test_loss < min_test_loss:
+            min_test_loss = test_loss
+            print(f"Saving model at epoch {epoch+1}")
+            torch.save(model.state_dict(), save_model_path)
+
+        scheduler.step(test_loss)
+
         tqdm.write(
             f"Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss:.4f}, Train Acc: {train_acc*100:.2f}%, Val Loss: {val_loss:.4f}, Val Acc: {val_acc*100:.2f}%, Test Loss: {test_loss:.4f}, Test Acc: {test_acc*100:.2f}%"
         )
@@ -132,4 +132,10 @@ def train_model_classification(
 
 
 def visualization_classification(model, test_loader, device):
-    pass
+    """
+    In this function, we will need to visualize a single image from each class in the test set.
+    Then, show the ground truth label and the prediction of the model for each image.
+    """
+    model.eval()
+    predictions = {i: None for i in range(100)}
+    labels = {i: None for i in range(100)}

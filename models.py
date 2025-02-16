@@ -65,7 +65,7 @@ class CNN(nn.Module):
         The output of the network. This is a tensor of size (batch_size, out_dim)
     """
 
-    def __init__(self, in_channels=3, out_dim=100):
+    def __init__(self, in_channels=3, out_dim=100, in_size=32):
         super(CNN, self).__init__()
 
         self.cnn = nn.Sequential(
@@ -79,7 +79,7 @@ class CNN(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=None),  # 128 x 16 x 16 -> 128 x 8 x 8
             nn.Conv2d(128, 64, 3, 1, 1),  # 128 x 8 x 8 -> 64 x 8 x 8
         )
-        self.fc = nn.Linear(64 * 8 * 8, out_dim)
+        self.fc = nn.Linear(64 * (in_size // 4) ** 2, out_dim)
 
     def forward(self, x):
         x = self.cnn(x)

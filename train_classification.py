@@ -11,6 +11,7 @@ from utils import *
 import argparse
 import os
 from tqdm import tqdm
+from torchvision import models
 
 
 def _get_args():
@@ -22,7 +23,13 @@ def _get_args():
         help="SGD or Adam",
     )
     p.add_argument("--lr", type=float, default=0.001)
-    p.add_argument("--model_type", type=str, default="FCNN", help="FCNN or CNN")
+    p.add_argument(
+        "--model_type",
+        type=str,
+        default="FCNN",
+        help="FCNN or CNN or ResNet18 or ResNet50",
+    )
+    p.add_argument("--img_size", type=int, default=32)
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--batch_size", type=int, default=64)
     p.add_argument("--patience", type=int, default=5)
@@ -46,9 +53,9 @@ if __name__ == "__main__":
 
     cifar_transform_train = transforms.Compose(
         [
-            # transforms.RandomHorizontalFlip(),
-            # transforms.RandomRotation(10),
-            # transforms.RandomGrayscale(p=0.2),
+            transforms.Resize((args.img_size, args.img_size)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomGrayscale(p=0.2),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
@@ -94,7 +101,13 @@ if __name__ == "__main__":
     if args.model_type == "FCNN":
         model = FCNN()
     elif args.model_type == "CNN":
-        model = CNN()
+        model = CNN(in_size=args.img_size)
+    elif args.model_type == "ResNet18":
+        model = models.resnet18(pretrained=False)
+        model.fc = nn.Linear(model.fc.in_features, 100)
+    elif args.model_type == "ResNet50":
+        model = models.resnet50(pretrained=False)
+        model.fc = nn.Linear(model.fc.in_features, 100)
     else:
         raise ValueError(f"Invalid model type: {args.model_type}")
 

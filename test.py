@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import models
 
 
-a = torch.randn(3, 10, 10)
-b = F.pad(a, (1, 1, 1, 1))
-print(b.shape)
+model = models.resnet18(pretrained=False)
+
+
+print(model)
