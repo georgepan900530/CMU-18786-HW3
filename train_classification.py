@@ -24,6 +24,7 @@ def _get_args():
         help="SGD or Adam",
     )
     p.add_argument("--lr", type=float, default=0.001)
+    p.add_argument("--label_smoothing", type=float, default=0.0)
     p.add_argument(
         "--model_type",
         type=str,
@@ -155,7 +156,7 @@ if __name__ == "__main__":
     model.to(device)
 
     # Define loss function and optimizer
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(label_smoothing=args.label_smoothing)
     if args.optimizer == "SGD":
         optimizer = torch.optim.SGD(
             model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4
