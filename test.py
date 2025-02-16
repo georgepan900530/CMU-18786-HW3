@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torchvision import models
 
 
-model = models.resnet50(pretrained=False)
+model = models.efficientnet_v2_m(pretrained=False)
 dummy_input = torch.randn(1, 3, 224, 224)
 
 

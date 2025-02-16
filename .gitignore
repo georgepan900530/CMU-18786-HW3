@@ -5,3 +5,4 @@ cifar_data/
 plots/
 *.docx
 .DS_Store
+test.py
