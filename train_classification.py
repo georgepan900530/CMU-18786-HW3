@@ -35,6 +35,7 @@ def _get_args():
     p.add_argument("--batch_size", type=int, default=64)
     p.add_argument("--patience", type=int, default=5)
     p.add_argument("--model_checkpoint", type=str, default=None)
+    p.add_argument("--aug", action="store_true")
     p.add_argument("--save_img_path", type=str, default="./plots/plot.png")
     p.add_argument(
         "--save_model_path", type=str, default="./checkpoints/best_model.pth"
@@ -52,17 +53,27 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
 
-    cifar_transform_train = transforms.Compose(
-        [
-            transforms.RandomResizedCrop(args.img_size),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomGrayscale(p=0.2),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
-            ),
-        ]
-    )
+    if args.aug:
+        cifar_transform_train = transforms.Compose(
+            [
+                transforms.RandomResizedCrop(args.img_size),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
+                ),
+            ]
+        )
+    else:
+        cifar_transform_train = transforms.Compose(
+            [
+                transforms.Resize((args.img_size, args.img_size)),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
+                ),
+            ]
+        )
 
     cifar_transform_test = transforms.Compose(
         [
@@ -73,7 +84,6 @@ if __name__ == "__main__":
             ),
         ]
     )
-
     # Note that CIFAR100 contains 100 classes, each with 500 training images and 100 test images
     train_dataset = CIFAR100(
         root="./cifar_data", train=True, transform=cifar_transform_train, download=True
