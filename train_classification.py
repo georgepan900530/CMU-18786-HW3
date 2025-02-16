@@ -12,6 +12,7 @@ import argparse
 import os
 from tqdm import tqdm
 from torchvision import models
+import torch.nn.functional as F
 
 
 def _get_args():
@@ -27,7 +28,7 @@ def _get_args():
         "--model_type",
         type=str,
         default="FCNN",
-        help="FCNN or CNN or ResNet18 or ResNet50",
+        help="FCNN or CNN or ResNet18 or ResNet50 or VGG16",
     )
     p.add_argument("--img_size", type=int, default=32)
     p.add_argument("--epochs", type=int, default=10)
@@ -53,7 +54,7 @@ if __name__ == "__main__":
 
     cifar_transform_train = transforms.Compose(
         [
-            transforms.Resize((args.img_size, args.img_size)),
+            transforms.RandomResizedCrop(args.img_size),
             transforms.RandomHorizontalFlip(),
             transforms.RandomGrayscale(p=0.2),
             transforms.ToTensor(),
@@ -89,10 +90,16 @@ if __name__ == "__main__":
     print(f"Validation dataset size: {len(val_dataset)}")
     print(f"Test dataset size: {len(test_dataset)}")
     train_loader = DataLoader(
-        dataset=train_dataset, batch_size=args.batch_size, shuffle=True
+        dataset=train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=2,
     )
     val_loader = DataLoader(
-        dataset=val_dataset, batch_size=args.batch_size, shuffle=False
+        dataset=val_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=2,
     )
     test_loader = DataLoader(dataset=test_dataset, batch_size=1, shuffle=False)
 
@@ -104,9 +111,30 @@ if __name__ == "__main__":
     elif args.model_type == "ResNet18":
         model = models.resnet18(pretrained=False)
         model.fc = nn.Linear(model.fc.in_features, 100)
+        # Initialize the model with Xavier initialization
+        for m in model.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
     elif args.model_type == "ResNet50":
         model = models.resnet50(pretrained=False)
         model.fc = nn.Linear(model.fc.in_features, 100)
+        # Initialize the model with Xavier initialization
+        for m in model.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+    elif args.model_type == "VGG16":
+        model = models.vgg16_bn(pretrained=False)
+        model.classifier[6] = nn.Linear(model.classifier[6].in_features, 100)
+        # Initialize the model with Xavier initialization
+        for m in model.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
     else:
         raise ValueError(f"Invalid model type: {args.model_type}")
 
@@ -119,7 +147,9 @@ if __name__ == "__main__":
     # Define loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     if args.optimizer == "SGD":
-        optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
+        optimizer = torch.optim.SGD(
+            model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4
+        )
     elif args.optimizer == "Adam":
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
