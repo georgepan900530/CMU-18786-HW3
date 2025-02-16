@@ -35,7 +35,7 @@ def _get_args():
     p.add_argument("--img_size", type=int, default=32)
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--batch_size", type=int, default=64)
-    p.add_argument("--patience", type=int, default=5)
+    p.add_argument("--patience", type=int, default=2)
     p.add_argument("--model_checkpoint", type=str, default=None)
     p.add_argument("--aug", action="store_true")
     p.add_argument("--save_img_path", type=str, default="./plots/plot.png")
@@ -82,7 +82,9 @@ if __name__ == "__main__":
         [
             transforms.Resize((args.img_size, args.img_size)),
             transforms.ToTensor(),
-            transforms.Normalize(mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761),
+            transforms.Normalize(
+                mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
+            ),
         ]
     )
     # Note that CIFAR100 contains 100 classes, each with 500 training images and 100 test images
@@ -128,7 +130,7 @@ if __name__ == "__main__":
     elif args.model_type == "EfficientNet":
         model = EfficientNet()
     elif args.model_type == "MyResNet":
-        model = MyResNet()
+        model = MyResNet(Residual_Block, [3, 3, 3, 3])
     else:
         raise ValueError(f"Invalid model type: {args.model_type}")
 
