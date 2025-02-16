@@ -121,41 +121,13 @@ if __name__ == "__main__":
     elif args.model_type == "CNN":
         model = CNN(in_size=args.img_size)
     elif args.model_type == "ResNet18":
-        model = models.resnet18(pretrained=False)
-        model.fc = nn.Linear(model.fc.in_features, 100)
-        # Initialize the model with Xavier initialization
-        for m in model.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform_(m.weight)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
+        model = ResNet18()
     elif args.model_type == "ResNet50":
-        model = models.resnet50(pretrained=False)
-        model.fc = nn.Linear(model.fc.in_features, 100)
-        # Initialize the model with Xavier initialization
-        for m in model.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform_(m.weight)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
+        model = ResNet50()
     elif args.model_type == "VGG16":
-        model = models.vgg16_bn(pretrained=False)
-        model.classifier[6] = nn.Linear(model.classifier[6].in_features, 100)
-        # Initialize the model with Xavier initialization
-        for m in model.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform_(m.weight)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
+        model = VGG16()
     elif args.model_type == "EfficientNet":
-        model = models.efficientnet_v2_m(pretrained=False)
-        model.classifier[1] = nn.Linear(model.classifier[1].in_features, 100)
-        # Initialize the model with Xavier initialization
-        for m in model.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform_(m.weight)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
+        model = EfficientNet()
     else:
         raise ValueError(f"Invalid model type: {args.model_type}")
 

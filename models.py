@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 from mytorch import MyConv2D, MyMaxPool2D
+from torchvision import models
 
 
 class FCNN(nn.Module):
@@ -85,4 +86,76 @@ class CNN(nn.Module):
         x = self.cnn(x)
         x = x.view(x.shape[0], -1)
         x = self.fc(x)
+        return x
+
+
+class ResNet18(nn.Module):
+    def __init__(self, out_dim=100):
+        super(ResNet18, self).__init__()
+        self.resnet18 = models.resnet18(pretrained=False)
+        self.resnet18.fc = nn.Linear(self.resnet18.fc.in_features, out_dim)
+        # Initialize the model with Xavier initialization
+        for m in self.resnet18.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        x = self.resnet18(x)
+        return x
+
+
+class ResNet50(nn.Module):
+    def __init__(self, out_dim=100):
+        super(ResNet50, self).__init__()
+        self.resnet50 = models.resnet50(pretrained=False)
+        self.resnet50.fc = nn.Linear(self.resnet50.fc.in_features, out_dim)
+        # Initialize the model with Xavier initialization
+        for m in self.resnet50.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        x = self.resnet50(x)
+        return x
+
+
+class VGG16(nn.Module):
+    def __init__(self, out_dim=100):
+        super(VGG16, self).__init__()
+        self.vgg16 = models.vgg16_bn(pretrained=False)
+        self.vgg16.classifier[6] = nn.Linear(
+            self.vgg16.classifier[6].in_features, out_dim
+        )
+        # Initialize the model with Xavier initialization
+        for m in self.vgg16.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        x = self.vgg16(x)
+        return x
+
+
+class EfficientNet(nn.Module):
+    def __init__(self, out_dim=100):
+        super(EfficientNet, self).__init__()
+        self.efficientnet = models.efficientnet_v2_m(pretrained=False)
+        self.efficientnet.classifier[1] = nn.Linear(
+            self.efficientnet.classifier[1].in_features, out_dim
+        )
+        # Initialize the model with Xavier initialization
+        for m in self.efficientnet.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        x = self.efficientnet(x)
         return x
