@@ -90,19 +90,39 @@ class CNN(nn.Module):
 
 
 class ResNet18(nn.Module):
-    def __init__(self, out_dim=100):
+    def __init__(self, out_dim=100, num_blocks=2):
         super(ResNet18, self).__init__()
         self.resnet18 = models.resnet18(pretrained=False)
-        self.resnet18.fc = nn.Linear(self.resnet18.fc.in_features, out_dim)
+        # Extract the initial layers and the first few blocks
+        self.initial_layers = nn.Sequential(
+            self.resnet18.conv1,
+            self.resnet18.bn1,
+            self.resnet18.relu,
+            self.resnet18.maxpool,
+        )
+
+        # Choose the number of blocks to include
+        self.blocks = nn.Sequential(
+            *list(self.resnet18.layer1.children())[:num_blocks],
+            *list(self.resnet18.layer2.children())[:num_blocks]
+        )
+
+        # Define the final fully connected layer
+        self.fc = nn.Linear(self.resnet18.layer2[-1].bn2.num_features, out_dim)
+
         # Initialize the model with Xavier initialization
-        for m in self.resnet18.modules():
+        for m in self.modules():
             if isinstance(m, nn.Linear):
                 nn.init.xavier_uniform_(m.weight)
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        x = self.resnet18(x)
+        x = self.initial_layers(x)
+        x = self.blocks(x)
+        x = F.adaptive_avg_pool2d(x, (1, 1))
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
         return x
 
 
