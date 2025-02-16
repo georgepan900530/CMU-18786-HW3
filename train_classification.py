@@ -51,6 +51,8 @@ if __name__ == "__main__":
 
     args = _get_args()
 
+    print(device)
+
     cifar_transform_train = transforms.Compose(
         [
             transforms.Resize((args.img_size, args.img_size)),
@@ -65,6 +67,7 @@ if __name__ == "__main__":
 
     cifar_transform_test = transforms.Compose(
         [
+            transforms.Resize((args.img_size, args.img_size)),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
