@@ -4,3 +4,4 @@ cifar_data/
 *jpg
 plots/
 *.docx
+.DS_Store
