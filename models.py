@@ -129,24 +129,25 @@ class Residual_Block(nn.Module):
 
 
 class MyResNet(nn.Module):
-    def __init__(self, block, layers, num_classes=100):
+    def __init__(self, block=Residual_Block, layers=[3, 4, 6, 3], num_classes=100):
         super(MyResNet, self).__init__()
         self.conv = nn.Conv2d(
             in_channels=3,
-            out_channels=16,
+            out_channels=64,
             kernel_size=3,
             stride=1,
             padding=1,
             bias=False,
         )
-        self.in_channels = 16
-        self.bn = nn.BatchNorm2d(16)
+        self.in_channels = 64
+        self.bn = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
-        self.layer1 = self.make_layer(block, 16, layers[0])
-        self.layer2 = self.make_layer(block, 32, layers[0], 2)
-        self.layer3 = self.make_layer(block, 64, layers[1], 2)
+        self.layer1 = self.make_layer(block, 64, layers[0], stride=1)
+        self.layer2 = self.make_layer(block, 128, layers[1], stride=2)
+        self.layer3 = self.make_layer(block, 256, layers[2], stride=2)
+        self.layer4 = self.make_layer(block, 512, layers[3], stride=2)
         self.avg_pool = nn.AvgPool2d(8)
-        self.fc = nn.Linear(64, num_classes)
+        self.fc = nn.Linear(512, num_classes)
         self.dropout = nn.Dropout(p=0.5)
 
     def make_layer(self, block, out_channels, blocks, stride=1):
