@@ -149,7 +149,7 @@ if __name__ == "__main__":
                     nn.init.constant_(m.bias, 0)
     elif args.model_type == "EfficientNet":
         model = models.efficientnet_v2_m(pretrained=False)
-        model.classifier[3] = nn.Linear(model.classifier[1].in_features, 100)
+        model.classifier[1] = nn.Linear(model.classifier[1].in_features, 100)
         # Initialize the model with Xavier initialization
         for m in model.modules():
             if isinstance(m, nn.Linear):
