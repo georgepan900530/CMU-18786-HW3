@@ -22,7 +22,7 @@ def _get_args():
         "--optimizer",
         type=str,
         default="Adam",
-        help="SGD or Adam",
+        help="SGD or Adam or AdamW",
     )
     p.add_argument("--lr", type=float, default=0.001)
     p.add_argument("--label_smoothing", type=float, default=0.0)
@@ -30,7 +30,7 @@ def _get_args():
         "--model_type",
         type=str,
         default="FCNN",
-        help="FCNN or CNN or ResNet18 or ResNet50 or VGG16 or EfficientNet",
+        help="FCNN or CNN or ResNet18 or ResNet50 or VGG16 or EfficientNet or MyResNet",
     )
     p.add_argument("--img_size", type=int, default=32)
     p.add_argument("--epochs", type=int, default=10)
@@ -45,8 +45,8 @@ def _get_args():
     return p.parse_args()
 
 
-torch.manual_seed(530)
-np.random.seed(530)
+torch.manual_seed(1124)
+np.random.seed(1124)
 
 
 if __name__ == "__main__":
@@ -58,13 +58,12 @@ if __name__ == "__main__":
     if args.aug:
         cifar_transform_train = transforms.Compose(
             [
-                transforms.Resize(
-                    args.img_size, interpolation=InterpolationMode.BILINEAR
-                ),
-                transforms.CenterCrop(args.img_size),
+                transforms.RandomCrop(args.img_size, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.AutoAugment(transforms.AutoAugmentPolicy.CIFAR10),
                 transforms.ToTensor(),
                 transforms.Normalize(
-                    mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+                    mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
                 ),
             ]
         )
@@ -74,7 +73,7 @@ if __name__ == "__main__":
                 transforms.Resize((args.img_size, args.img_size)),
                 transforms.ToTensor(),
                 transforms.Normalize(
-                    mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+                    mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
                 ),
             ]
         )
@@ -83,7 +82,7 @@ if __name__ == "__main__":
         [
             transforms.Resize((args.img_size, args.img_size)),
             transforms.ToTensor(),
-            transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+            transforms.Normalize(mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761),
         ]
     )
     # Note that CIFAR100 contains 100 classes, each with 500 training images and 100 test images
@@ -128,6 +127,8 @@ if __name__ == "__main__":
         model = VGG16()
     elif args.model_type == "EfficientNet":
         model = EfficientNet()
+    elif args.model_type == "MyResNet":
+        model = MyResNet()
     else:
         raise ValueError(f"Invalid model type: {args.model_type}")
 
@@ -145,8 +146,10 @@ if __name__ == "__main__":
         )
     elif args.optimizer == "Adam":
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    elif args.optimizer == "AdamW":
+        optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-5)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", factor=0.1, patience=args.patience, verbose=True
+        optimizer, mode="max", factor=0.1, patience=args.patience, verbose=True
     )
 
     logs = train_model_classification(

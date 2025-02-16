@@ -57,7 +57,7 @@ def train_model_classification(
         "test_acc": [],
         "epochs": [i + 1 for i in range(num_epochs)],
     }
-    min_test_loss = float("inf")
+    max_test_acc = float("-inf")
     for epoch in tqdm(range(num_epochs)):
         train_loss_list = []
         train_acc_list = []
@@ -118,12 +118,12 @@ def train_model_classification(
         logs["test_loss"].append(test_loss)
         logs["test_acc"].append(test_acc)
 
-        if test_loss < min_test_loss:
-            min_test_loss = test_loss
+        if test_acc > max_test_acc:
+            max_test_acc = test_acc
             print(f"Saving model at epoch {epoch+1}")
             torch.save(model.state_dict(), save_model_path)
 
-        scheduler.step(test_loss)
+        scheduler.step(test_acc)
 
         tqdm.write(
             f"Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss:.4f}, Train Acc: {train_acc*100:.2f}%, Val Loss: {val_loss:.4f}, Val Acc: {val_acc*100:.2f}%, Test Loss: {test_loss:.4f}, Test Acc: {test_acc*100:.2f}%"
