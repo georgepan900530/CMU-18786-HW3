@@ -13,6 +13,7 @@ import os
 from tqdm import tqdm
 from torchvision import models
 import torch.nn.functional as F
+from torchvision.transforms import InterpolationMode
 
 
 def _get_args():
@@ -57,11 +58,13 @@ if __name__ == "__main__":
     if args.aug:
         cifar_transform_train = transforms.Compose(
             [
-                transforms.RandomResizedCrop(args.img_size),
-                transforms.RandomHorizontalFlip(),
+                transforms.Resize(
+                    args.img_size, interpolation=InterpolationMode.BILINEAR
+                ),
+                transforms.CenterCrop(args.img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(
-                    mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
+                    mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
                 ),
             ]
         )
@@ -71,7 +74,7 @@ if __name__ == "__main__":
                 transforms.Resize((args.img_size, args.img_size)),
                 transforms.ToTensor(),
                 transforms.Normalize(
-                    mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
+                    mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
                 ),
             ]
         )
@@ -80,9 +83,7 @@ if __name__ == "__main__":
         [
             transforms.Resize((args.img_size, args.img_size)),
             transforms.ToTensor(),
-            transforms.Normalize(
-                mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761)
-            ),
+            transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
         ]
     )
     # Note that CIFAR100 contains 100 classes, each with 500 training images and 100 test images
