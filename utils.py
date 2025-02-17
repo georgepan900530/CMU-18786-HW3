@@ -295,7 +295,7 @@ def visualization_classification(model, test_loader, device, save_path, is_ten=F
             ax.imshow(image)
             ax.set_title(
                 f"Class: {cifar100_classes[label]}\nGT: {labels[label]}\nPred: {predictions[label]}",
-                fontsize=8,
+                fontsize=25,
             )
             ax.axis("off")
 
