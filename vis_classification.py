@@ -26,6 +26,7 @@ def _get_args():
         default="FCNN",
         help="FCNN or CNN or ResNet18 or ResNet50 or VGG16 or EfficientNet or MyResNet",
     )
+    p.add_argument("--is_ten", action="store_true")
     p.add_argument("--img_size", type=int, default=32)
     p.add_argument("--save_path", type=str, default="./plots/pred_fcnn.png")
     return p.parse_args()
@@ -69,7 +70,9 @@ if __name__ == "__main__":
     else:
         raise ValueError(f"Invalid model type: {args.model_type}")
 
-    model.load_state_dict(torch.load(args.model_path))
+    model.load_state_dict(torch.load(args.model_path, map_location=device))
     model.to(device)
 
-    visualization_classification(model, test_loader, device, args.save_path)
+    visualization_classification(
+        model, test_loader, device, args.save_path, is_ten=args.is_ten
+    )
