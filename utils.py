@@ -131,7 +131,7 @@ def train_model_classification(
     return logs
 
 
-def visualization_classification(model, test_loader, device, save_path):
+def visualization_classification(model, test_loader, device, save_path, is_ten=False):
     """
     In this function, we will need to visualize a single image from each class in the test set.
     Then, show the ground truth label and the prediction of the model for each image.
@@ -241,33 +241,63 @@ def visualization_classification(model, test_loader, device, save_path):
     model.eval()
     predictions = {}
     labels = {}
-    class_images = {}
-    for img, label in test_loader:
-        img, label = img.to(device), label.to(device)
-        outputs = model(img)
-        pred = torch.argmax(outputs, dim=1)
-        if label.item() not in class_images:
-            class_images[label.item()] = img[0].cpu().numpy()
-            labels[label.item()] = label.item()
-            predictions[label.item()] = pred.item()
+    if not is_ten:
+        class_images = {}
+        for img, label in test_loader:
+            img, label = img.to(device), label.to(device)
+            outputs = model(img)
+            pred = torch.argmax(outputs, dim=1)
+            if label.item() not in class_images:
+                class_images[label.item()] = img[0].cpu().numpy()
+                labels[label.item()] = label.item()
+                predictions[label.item()] = pred.item()
 
-        if len(class_images) == 100:
-            break
+            if len(class_images) == 100:
+                break
 
-    fig, axes = plt.subplots(10, 10, figsize=(20, 20))
-    for i, (label, image) in enumerate(class_images.items()):
-        ax = axes[i // 10, i % 10]
-        image = image.transpose(1, 2, 0)  # CxHxW -> HxWxC
-        image = image * np.array([0.2675, 0.2565, 0.2761]) + np.array(
-            [0.5071, 0.4867, 0.4408]
-        )  # Unnormalize
-        image = np.clip(image, 0, 1)
-        ax.imshow(image)
-        ax.set_title(
-            f"Class: {cifar100_classes[label]}\nGT: {labels[label]}\nPred: {predictions[label]}",
-            fontsize=8,
-        )
-        ax.axis("off")
+        fig, axes = plt.subplots(10, 10, figsize=(20, 20))
+        for i, (label, image) in enumerate(class_images.items()):
+            ax = axes[i // 10, i % 10]
+            image = image.transpose(1, 2, 0)  # CxHxW -> HxWxC
+            image = image * np.array([0.2675, 0.2565, 0.2761]) + np.array(
+                [0.5071, 0.4867, 0.4408]
+            )  # Unnormalize
+            image = np.clip(image, 0, 1)
+            ax.imshow(image)
+            ax.set_title(
+                f"Class: {cifar100_classes[label]}\nGT: {labels[label]}\nPred: {predictions[label]}",
+                fontsize=8,
+            )
+            ax.axis("off")
+    else:
+        rand_classes = list(np.random.randint(0, 100, 10))
+        class_images = {}
+        for img, label in test_loader:
+            img, label = img.to(device), label.to(device)
+            outputs = model(img)
+            pred = torch.argmax(outputs, dim=1)
+            if label.item() in rand_classes:
+                class_images[label.item()] = img[0].cpu().numpy()
+                labels[label.item()] = label.item()
+                predictions[label.item()] = pred.item()
+
+            if len(class_images) == 10:
+                break
+
+        fig, axes = plt.subplots(2, 5, figsize=(20, 20))
+        for i, (label, image) in enumerate(class_images.items()):
+            ax = axes[i // 5, i % 5]
+            image = image.transpose(1, 2, 0)
+            image = image * np.array([0.2675, 0.2565, 0.2761]) + np.array(
+                [0.5071, 0.4867, 0.4408]
+            )
+            image = np.clip(image, 0, 1)
+            ax.imshow(image)
+            ax.set_title(
+                f"Class: {cifar100_classes[label]}\nGT: {labels[label]}\nPred: {predictions[label]}",
+                fontsize=8,
+            )
+            ax.axis("off")
 
     plt.tight_layout()
     plt.savefig(save_path)

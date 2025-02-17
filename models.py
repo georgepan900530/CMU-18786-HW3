@@ -89,6 +89,7 @@ class CNN(nn.Module):
         return x
 
 
+# This Resnet implementation is based on my homework 3 in the course Machine Learning Spring 2022 at National Taiwan University (https://speech.ee.ntu.edu.tw/~hylee/ml/2022-spring.php)
 class Residual_Block(nn.Module):
     def __init__(self, in_channel, out_channel, stride=1, down_sample=None):
         super(Residual_Block, self).__init__()

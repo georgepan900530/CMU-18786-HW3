@@ -24,7 +24,7 @@ def _get_args():
         "--model_type",
         type=str,
         default="FCNN",
-        help="FCNN or CNN or ResNet18 or ResNet50",
+        help="FCNN or CNN or ResNet18 or ResNet50 or VGG16 or EfficientNet or MyResNet",
     )
     p.add_argument("--img_size", type=int, default=32)
     p.add_argument("--save_path", type=str, default="./plots/pred_fcnn.png")
@@ -57,11 +57,15 @@ if __name__ == "__main__":
     elif args.model_type == "CNN":
         model = CNN(in_size=args.img_size)
     elif args.model_type == "ResNet18":
-        model = models.resnet18(pretrained=False)
-        model.fc = nn.Linear(model.fc.in_features, 100)
+        model = ResNet18()
     elif args.model_type == "ResNet50":
-        model = models.resnet50(pretrained=False)
-        model.fc = nn.Linear(model.fc.in_features, 100)
+        model = ResNet50()
+    elif args.model_type == "VGG16":
+        model = VGG16()
+    elif args.model_type == "EfficientNet":
+        model = EfficientNet()
+    elif args.model_type == "MyResNet":
+        model = MyResNet()
     else:
         raise ValueError(f"Invalid model type: {args.model_type}")
 
